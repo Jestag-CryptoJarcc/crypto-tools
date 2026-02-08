@@ -965,11 +965,21 @@ body.widget-open .widget-overlay {
     }
 
     .guide-grid {
-        gap: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
     }
 
     .guide-card {
         background: rgba(18, 24, 30, 0.98);
+    }
+
+    .guide-grid > .guide-card {
+        margin: 0 0 20px;
+    }
+
+    .guide-grid > .guide-card:last-child {
+        margin-bottom: 0;
     }
 }
 

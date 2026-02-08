@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% set page_title = "Crypto News" %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">NEWS</div>
+    <h1>Crypto Headlines</h1>
+    <p class="lead">A clean feed so you can scan quickly, then dive deeper only when it matters.</p>
+    <p class="muted">Sources: CoinDesk, Cointelegraph, The Block, Reddit (r/CryptoCurrency, r/Bitcoin). Updated automatically.</p>
+    <p class="muted">Disclaimer: News is noise as much as signal. Anyone can post anything online, so always do your own deep dive. If the feed starts influencing your mood or decisions, step away and think for yourself first.</p>
+</header>
+
+<div class="news-tabs">
+    <button class="chip tab-btn active" data-tab="daily">Today</button>
+    <button class="chip secondary tab-btn" data-tab="weekly">This Week</button>
+</div>
+
+<section class="news-section" data-panel="daily">
+    <div class="news-grid">
+        {% if daily %}
+        {% for item in daily %}
+        <article class="news-card">
+            <div class="news-image {% if not item.image %}placeholder{% endif %}">
+                {% if item.image %}
+                <img src="{{ item.image }}" alt="News image" loading="lazy">
+                {% else %}
+                <div class="news-fallback">
+                    <span>{{ item.source }}</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="news-meta">
+                <span class="pill">{{ item.source }}</span>
+                <span class="muted">{{ item.published_str }}</span>
+            </div>
+            <h3>{{ item.title }}</h3>
+            {% if item.summary %}
+            <p class="news-summary">{{ item.summary }}</p>
+            {% endif %}
+            {% if item.url %}
+            <a class="news-link" href="{{ item.url }}" target="_blank" rel="noopener">Source</a>
+            {% endif %}
+        </article>
+        {% endfor %}
+        {% else %}
+        <p class="muted">No headlines yet today. Check back soon.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="news-section hidden" data-panel="weekly">
+    <div class="news-grid">
+        {% if weekly %}
+        {% for item in weekly %}
+        <article class="news-card">
+            <div class="news-image {% if not item.image %}placeholder{% endif %}">
+                {% if item.image %}
+                <img src="{{ item.image }}" alt="News image" loading="lazy">
+                {% else %}
+                <div class="news-fallback">
+                    <span>{{ item.source }}</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="news-meta">
+                <span class="pill">{{ item.source }}</span>
+                <span class="muted">{{ item.published_str }}</span>
+            </div>
+            <h3>{{ item.title }}</h3>
+            {% if item.summary %}
+            <p class="news-summary">{{ item.summary }}</p>
+            {% endif %}
+            {% if item.url %}
+            <a class="news-link" href="{{ item.url }}" target="_blank" rel="noopener">Source</a>
+            {% endif %}
+        </article>
+        {% endfor %}
+        {% else %}
+        <p class="muted">No headlines this week yet.</p>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('[data-panel]');
+    tabs.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            tabs.forEach((b) => b.classList.remove('active'));
+            tabs.forEach((b) => b.classList.add('secondary'));
+            btn.classList.add('active');
+            btn.classList.remove('secondary');
+            const target = btn.dataset.tab;
+            panels.forEach((panel) => {
+                panel.classList.toggle('hidden', panel.dataset.panel !== target);
+            });
+        });
+    });
+
+    document.addEventListener('click', (event) => {
+        const card = event.target.closest('.news-card');
+        if (!card) return;
+        card.classList.toggle('expanded');
+    });
+
+    setInterval(() => {
+        window.location.reload();
+    }, 3600000);
+</script>
+{% endblock %}

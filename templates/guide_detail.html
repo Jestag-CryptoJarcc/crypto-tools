@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% set page_title = page.title %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">GUIDE</div>
+    <h1>{{ page.title }}</h1>
+    <p class="lead">{{ page.intro }}</p>
+    <p class="muted">This page breaks down the topic in plain language, section by section, so you can learn the idea without getting lost in jargon.</p>
+    <p class="muted">Educational only. Not financial advice.</p>
+    <div class="quote-rotator" aria-live="polite">
+        <span class="quote-text"></span>
+    </div>
+</header>
+
+<section class="card guide-card">
+    {% for section in page.sections %}
+    <div class="guide-section">
+        <h2 class="guide-subhead">{{ section.heading }}</h2>
+        <p class="muted">{{ section.body }}</p>
+        {% if section.links %}
+        <div class="guide-links">
+            {% for link in section.links %}
+            <a class="guide-link-item" href="{{ link.url }}" target="_blank" rel="noopener">{{ link.label }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>
+
+<div class="guide-back">
+    <a class="chip" href="/guide">Back to all guides</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const quotes = (window.location.pathname.includes('my-beliefs'))
+        ? [
+            "I share what I learn for free because I believe knowledge should be open.",
+            "My role is to learn, build, and help others understand what I see.",
+            "Crypto is personal; I want people to choose with their own mind.",
+            "I would rather educate than sell a course.",
+            "Real communities share what they know and build together.",
+            "I believe the future is open systems, not closed gates.",
+            "If it helps someone avoid a mistake, it was worth sharing.",
+            "Take what helps, leave the rest, and keep learning."
+        ]
+        : (window.location.pathname.includes('future'))
+        ? [
+            "The future is built by people who keep shipping, not by hype.",
+            "Open systems win over time because anyone can build.",
+            "Programmable money will change what products can exist.",
+            "The real shift is access: anyone, anywhere, anytime.",
+            "Crypto is still early, which is why the next decade matters.",
+            "Strong ideas survive cycles; weak ones disappear.",
+            "The long game is utility, not headlines.",
+            "Infrastructure beats speculation in the end."
+        ]
+        : (window.location.pathname.includes('security'))
+        ? [
+            "Slow down and verify; scammers rely on speed.",
+            "No one legitimate will ever ask for your seed phrase.",
+            "Security is a habit, not a single action.",
+            "If it sounds too good to be true, it usually is.",
+            "Protect the keys and you protect the coins.",
+            "Use trusted links and double‑check everything.",
+            "Your wallet is your vault: treat it that way.",
+            "In crypto, you are the security team."
+        ]
+        : (window.location.pathname.includes('crypto-basics'))
+        ? [
+            "Altcoins are experiments: some change the world, most fade away.",
+            "Crypto is open by default; trust is replaced by verification.",
+            "Innovation is loud, but utility is what survives.",
+            "If you can’t explain a coin simply, you probably don’t own it yet.",
+            "Use cases matter more than hype cycles.",
+            "Crypto is a toolbox, not a single tool.",
+            "Altcoins move fast because they are still proving themselves.",
+            "The best projects keep building when the market is quiet."
+        ]
+        : [
+            "Bitcoin is money with rules you can read, verify, and trust without asking permission.",
+            "Trust the math and the network, not a middleman that can say no.",
+            "Scarcity is built into the code, not promised by a person.",
+            "Your keys mean your control, and that is the whole point.",
+            "Open rules and a public ledger keep the system honest for everyone.",
+            "Bitcoin rewards patience because strong money is built over time.",
+            "Censorship resistance matters most when it is hardest to get it.",
+            "The protocol treats everyone the same, which is why it lasts."
+        ];
+    const el = document.querySelector('.quote-text');
+    if (el) {
+        const pick = () => quotes[Math.floor(Math.random() * quotes.length)];
+        const swap = () => {
+            el.classList.add('fade');
+            setTimeout(() => {
+                el.textContent = pick();
+                el.classList.remove('fade');
+            }, 350);
+        };
+        el.textContent = pick();
+        setInterval(swap, 15000);
+    }
+</script>
+{% endblock %}

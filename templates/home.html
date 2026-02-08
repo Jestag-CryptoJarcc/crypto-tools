@@ -1,0 +1,228 @@
+﻿{% extends "base.html" %}
+{% set page_title = "Crypto Toolkit" %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">INTRO</div>
+    <h1>Welcome to the Crypto Toolkit</h1>
+    <p class="lead">A clean, personal crypto dashboard built for speed, clarity, and day‑to‑day decisions.</p>
+    <p class="muted">This page is the heartbeat of the toolkit. It gives you a fast read on the market, quick access to tools, and a personal watchlist you can trust. No noise, no hype — just the essentials laid out clearly.</p>
+    <div class="hero-notes">
+        <div>
+            <strong>Live Market</strong>
+            <span class="muted">Top coins, price moves, volume, and market cap at a glance.</span>
+        </div>
+        <div>
+            <strong>Quick Tools</strong>
+            <span class="muted">Converters, sentiment, and helpers that keep you moving.</span>
+        </div>
+        <div>
+            <strong>My Watchlist</strong>
+            <span class="muted">The coins that matter most to me, always pinned and easy to read.</span>
+        </div>
+    </div>
+    <p class="muted">Built for beginners and veterans alike — friendly when you’re learning, fast when you already know what you need.</p>
+</header>
+
+<section class="card">
+    <div class="market-head">
+        <div>
+            <h2 class="market-title" data-title-top>Top 15 Crypto</h2>
+            <p class="muted market-subtitle" data-subtitle-top>Top coins by market cap with price, 24h change, volume, and market cap.</p>
+            <p class="muted market-subtitle hidden" data-subtitle-my>My personal picks and long‑term holds.</p>
+        </div>
+        <div class="market-tabs">
+            <button class="chip tab-btn active" data-tab="top15" type="button">Top 15 Coins</button>
+            <button class="chip secondary tab-btn" data-tab="mycoins" type="button">Coins Important to Me</button>
+        </div>
+    </div>
+    <div class="market-panel" data-panel="top15">
+        <div class="market-list">
+        {% if top_coins %}
+        {% for coin in top_coins %}
+        <div class="market-row" data-id="{{ coin.id }}">
+            <div class="market-coin">
+                {% if coin.image %}
+                <img src="{{ coin.image }}" alt="{{ coin.symbol }} logo" loading="lazy">
+                {% endif %}
+                <div>
+                    <strong>{{ coin.name }}</strong>
+                    <span class="muted">{{ coin.symbol }}</span>
+                    {% if coin.rank %}
+                    <span class="muted">#{{ coin.rank }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="market-metrics">
+                <div>
+                    <span class="muted">Price</span>
+                    <strong data-price>${{ "{:,.2f}".format(coin.price_usd) }}</strong>
+                </div>
+                <div>
+                    <span class="muted">24h</span>
+                    <strong data-change class="{{ 'up' if coin.change_24h >= 0 else 'down' }}">
+                        <span class="change-arrow">{{ '▲' if coin.change_24h >= 0 else '▼' }}</span>
+                        {{ "{:+.2f}%".format(coin.change_24h) }}
+                    </strong>
+                </div>
+                <div>
+                    <span class="muted">Volume</span>
+                    <strong data-volume>${{ "{:,.0f}".format(coin.volume_24h) }}</strong>
+                </div>
+                <div>
+                    <span class="muted">Market Cap</span>
+                    <strong data-cap>${{ "{:,.0f}".format(coin.market_cap) }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="muted">Unable to load market data right now. Please refresh in a moment.</p>
+        {% endif %}
+        </div>
+    </div>
+    <div class="market-panel hidden" data-panel="mycoins">
+        {% if my_coins %}
+        <div class="market-list">
+            {% for coin in my_coins %}
+            <div class="market-row" data-my-id="{{ coin.id }}">
+                <div class="market-coin">
+                    {% if coin.image %}
+                    <img src="{{ coin.image }}" alt="{{ coin.symbol }} logo" loading="lazy">
+                    {% endif %}
+                    <div>
+                        <strong>{{ coin.name }}</strong>
+                        <span class="muted">{{ coin.symbol }}</span>
+                    </div>
+                </div>
+                <div class="market-metrics">
+                    <div>
+                        <span class="muted">Price</span>
+                        <strong data-price>${{ "{:,.6f}".format(coin.price_usd) }}</strong>
+                    </div>
+                    <div>
+                        <span class="muted">24h</span>
+                        <strong data-change class="{{ 'up' if coin.change_24h >= 0 else 'down' }}">
+                            <span class="change-arrow">{{ '▲' if coin.change_24h >= 0 else '▼' }}</span>
+                            {{ "{:+.2f}%".format(coin.change_24h) }}
+                        </strong>
+                    </div>
+                    <div>
+                        <span class="muted">Volume</span>
+                        <strong data-volume>${{ "{:,.0f}".format(coin.volume_24h) }}</strong>
+                    </div>
+                    <div>
+                        <span class="muted">Market Cap</span>
+                        <strong data-cap>${{ "{:,.0f}".format(coin.market_cap) }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">Your important coins will show here once you add them.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const tabs = document.querySelectorAll('.market-tabs .tab-btn');
+    const panels = document.querySelectorAll('.market-panel');
+    const titleEl = document.querySelector('[data-title-top]');
+    const subTop = document.querySelector('[data-subtitle-top]');
+    const subMy = document.querySelector('[data-subtitle-my]');
+    const applyTab = (target) => {
+        panels.forEach((panel) => {
+            panel.classList.toggle('hidden', panel.dataset.panel !== target);
+        });
+        if (titleEl) {
+            titleEl.textContent = target === 'mycoins' ? 'Coins Important to Me' : 'Top 15 Crypto';
+        }
+        if (subTop && subMy) {
+            subTop.classList.toggle('hidden', target === 'mycoins');
+            subMy.classList.toggle('hidden', target !== 'mycoins');
+        }
+    };
+
+    tabs.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            tabs.forEach((b) => b.classList.remove('active'));
+            tabs.forEach((b) => b.classList.add('secondary'));
+            btn.classList.add('active');
+            btn.classList.remove('secondary');
+            const target = btn.dataset.tab;
+            applyTab(target);
+        });
+    });
+
+    const activeBtn = document.querySelector('.market-tabs .tab-btn.active');
+    if (activeBtn) {
+        applyTab(activeBtn.dataset.tab);
+    }
+
+    async function refreshData() {
+        try {
+            const res = await fetch('/api/summary');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!data || !data.top_coins) return;
+            data.top_coins.forEach((coin) => {
+                const row = document.querySelector(`.market-row[data-id="${coin.id}"]`);
+                if (!row) return;
+                const priceEl = row.querySelector('[data-price]');
+                if (priceEl && coin.price_usd != null) {
+                    priceEl.textContent = `$${coin.price_usd.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+                }
+                const changeEl = row.querySelector('[data-change]');
+                if (changeEl && coin.change_24h != null) {
+                    const sign = coin.change_24h >= 0 ? '+' : '';
+                    const arrow = coin.change_24h >= 0 ? '▲' : '▼';
+                    changeEl.innerHTML = `<span class="change-arrow">${arrow}</span> ${sign}${coin.change_24h.toFixed(2)}%`;
+                    changeEl.classList.toggle('up', coin.change_24h >= 0);
+                    changeEl.classList.toggle('down', coin.change_24h < 0);
+                }
+                const volEl = row.querySelector('[data-volume]');
+                if (volEl && coin.volume_24h != null) {
+                    volEl.textContent = `$${coin.volume_24h.toLocaleString()}`;
+                }
+                const capEl = row.querySelector('[data-cap]');
+                if (capEl && coin.market_cap != null) {
+                    capEl.textContent = `$${coin.market_cap.toLocaleString()}`;
+                }
+            });
+
+            if (data.my_coins) {
+                data.my_coins.forEach((coin) => {
+                    const row = document.querySelector(`.market-row[data-my-id="${coin.id}"]`);
+                    if (!row) return;
+                    const priceEl = row.querySelector('[data-price]');
+                    if (priceEl && coin.price_usd != null) {
+                        priceEl.textContent = `$${Number(coin.price_usd).toLocaleString(undefined, {maximumFractionDigits: 6})}`;
+                    }
+                    const changeEl = row.querySelector('[data-change]');
+                    if (changeEl && coin.change_24h != null) {
+                        const sign = coin.change_24h >= 0 ? '+' : '';
+                        const arrow = coin.change_24h >= 0 ? '▲' : '▼';
+                        changeEl.innerHTML = `<span class="change-arrow">${arrow}</span> ${sign}${Number(coin.change_24h).toFixed(2)}%`;
+                        changeEl.classList.toggle('up', coin.change_24h >= 0);
+                        changeEl.classList.toggle('down', coin.change_24h < 0);
+                    }
+                    const volEl = row.querySelector('[data-volume]');
+                    if (volEl && coin.volume_24h != null) {
+                        volEl.textContent = `$${Number(coin.volume_24h).toLocaleString()}`;
+                    }
+                    const capEl = row.querySelector('[data-cap]');
+                    if (capEl && coin.market_cap != null) {
+                        capEl.textContent = `$${Number(coin.market_cap).toLocaleString()}`;
+                    }
+                });
+            }
+        } catch (err) {
+            // ignore
+        }
+    }
+    setInterval(refreshData, 10000);
+</script>
+{% endblock %}
+

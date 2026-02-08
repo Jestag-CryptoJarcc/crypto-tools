@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% set page_title = "Crypto Guide" %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">GUIDE</div>
+    <h1>How I See Crypto</h1>
+    <p class="lead">My personal take after 8-9 years of daily-driving crypto - simple, grounded, and focused on what actually matters.</p>
+    <p class="muted">This is not financial advice. It is a perspective from someone who has been around long enough to see hype cycles, quiet build seasons, and everything in between.</p>
+</header>
+
+<section class="guide-grid">
+    <a class="card guide-card guide-link guide-btc-card" href="/guide/btc-cycle">
+        <div class="guide-btc-top">
+            <div>
+                <h2>Bitcoin (BTC)</h2>
+                <p class="muted">Your main BTC guide. Clear, simple, and focused on the basics that shape the whole market.</p>
+            </div>
+        </div>
+        <img class="guide-btc-wordmark" src="https://bitcoin.org/img/icons/logotop.svg" alt="Bitcoin wordmark" loading="lazy">
+        <div class="guide-btc-spacer"></div>
+        <span class="guide-cta">Read more</span>
+    </a>
+
+    <a class="card guide-card guide-link guide-alt-card" href="/guide/crypto-basics">
+        <div class="guide-btc-top">
+            <div>
+                <h2>Crypto & Altcoins</h2>
+                <p class="muted">A beginner-friendly guide to what crypto is, why altcoins exist, and how to think about them.</p>
+            </div>
+        </div>
+        <img class="guide-alt-wordmark" src="https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=040" alt="Ethereum logo" loading="lazy">
+        <div class="guide-btc-spacer"></div>
+        <span class="guide-cta">Read more</span>
+    </a>
+
+    <a class="card guide-card guide-link guide-security-card" href="/guide/security">
+        <div class="guide-btc-top">
+            <div>
+                <h2>Scams, Fraud & Security</h2>
+                <p class="muted">A practical guide to staying safe in crypto and spotting red flags early.</p>
+            </div>
+        </div>
+        <div class="guide-security-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" aria-label="Shield">
+                <path d="M12 2l7 3v6c0 5-3.5 9-7 11-3.5-2-7-6-7-11V5l7-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="guide-btc-spacer"></div>
+        <span class="guide-cta">Read more</span>
+    </a>
+
+    <a class="card guide-card guide-link guide-future-card" href="/guide/future">
+        <div class="guide-btc-top">
+            <div>
+                <h2>The Future of Crypto</h2>
+                <p class="muted">Where this space might go next, and the real-world impact that is already starting.</p>
+            </div>
+        </div>
+        <div class="guide-future-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" aria-label="Future">
+                <path d="M12 3l2.2 4.4L19 9l-4.8 1.6L12 15l-2.2-4.4L5 9l4.8-1.6L12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M4 18h16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="guide-btc-spacer"></div>
+        <span class="guide-cta">Read more</span>
+    </a>
+
+    <a class="card guide-card guide-link guide-beliefs-card center-card" href="/guide/my-beliefs">
+        <div class="guide-btc-top">
+            <div>
+                <h2>My Beliefs & Rules</h2>
+                <p class="muted">My personal view of crypto - what I believe, how I move, and why.</p>
+            </div>
+        </div>
+        <div class="guide-beliefs-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" aria-label="Beliefs">
+                <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="guide-btc-spacer"></div>
+        <span class="guide-cta">Read more</span>
+    </a>
+
+</section>
+
+<section class="card guide-card">
+    <h2>People I Follow (DYOR)</h2>
+    <p class="muted">These are not endorsements. I just share who I learn from. Always verify information yourself.</p>
+    <div class="people-list">
+        <div class="person-row">
+            <div>
+                <strong>Didi Taihuttu</strong>
+                <span class="muted">The Bitcoin Family</span>
+            </div>
+            <a class="guide-cta" href="https://www.youtube.com/@TheBitcoinfamily" target="_blank" rel="noopener">YouTube</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,119 @@
+﻿{% set page_title = page_title or 'Crypto Toolkit' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="app-shell">
+        <aside class="side">
+            <div class="side-title">
+                <span class="kicker">JESTAG</span>
+                <strong>Crypto Toolkit</strong>
+            </div>
+            <nav class="side-nav">
+                <a class="nav-item {% if active == 'home' %}active{% endif %}" href="/">Home</a>
+                <a class="nav-item {% if active == 'guide' %}active{% endif %}" href="/guide">Crypto Guide</a>
+                <a class="nav-item {% if active == 'markets' %}active{% endif %}" href="/markets">Markets</a>
+                <a class="nav-item {% if active == 'tools' %}active{% endif %}" href="/tools">Tools</a>
+                <a class="nav-item {% if active == 'personal' %}active{% endif %}" href="/my">My Crypto</a>
+                <a class="nav-item {% if active == 'news' %}active{% endif %}" href="/news">News</a>
+                <a class="nav-item {% if active == 'suggestions' %}active{% endif %}" href="/suggestions">Suggestions &amp; Contact</a>
+            </nav>
+            <div class="side-footer">
+                <span class="muted">Live crypto dashboard</span>
+                <span class="muted">Built for fast signal</span>
+            </div>
+        </aside>
+        <main class="page{% if page_wide %} wide{% endif %}">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-meta">
+                <strong>Crypto Toolkit</strong>
+                <span class="muted">Created {{ site_created }} · Updated {{ site_updated }}</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://jestag.com" target="_blank" rel="noopener">Jestag.com</a>
+                <a href="https://cryptojar.cc/app/" target="_blank" rel="noopener">CryptoJar</a>
+                <a href="https://smellowsproject.com/" target="_blank" rel="noopener">Smellow's Project</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const canvasBg = document.getElementById('bg-canvas');
+        const ctxBg = canvasBg.getContext('2d');
+        let dots = [];
+        let width = 0;
+        let height = 0;
+
+        function resizeCanvas() {
+            width = canvasBg.width = window.innerWidth;
+            height = canvasBg.height = window.innerHeight;
+            const count = Math.min(90, Math.floor((width * height) / 18000));
+            dots = Array.from({ length: count }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                r: 1.2 + Math.random() * 1.2
+            }));
+        }
+
+        function draw() {
+            ctxBg.clearRect(0, 0, width, height);
+            const maxDist = 140;
+            ctxBg.fillStyle = 'rgba(242, 193, 78, 0.4)';
+
+            for (let i = 0; i < dots.length; i++) {
+                const d = dots[i];
+                d.x += d.vx;
+                d.y += d.vy;
+                if (d.x < 0 || d.x > width) d.vx *= -1;
+                if (d.y < 0 || d.y > height) d.vy *= -1;
+            }
+
+            for (let i = 0; i < dots.length; i++) {
+                const a = dots[i];
+                for (let j = i + 1; j < dots.length; j++) {
+                    const b = dots[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < maxDist) {
+                        const alpha = 1 - dist / maxDist;
+                        ctxBg.strokeStyle = `rgba(123, 223, 242, ${alpha * 0.18})`;
+                        ctxBg.lineWidth = 1;
+                        ctxBg.beginPath();
+                        ctxBg.moveTo(a.x, a.y);
+                        ctxBg.lineTo(b.x, b.y);
+                        ctxBg.stroke();
+                    }
+                }
+            }
+
+            for (let i = 0; i < dots.length; i++) {
+                const d = dots[i];
+                ctxBg.beginPath();
+                ctxBg.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                ctxBg.fill();
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        draw();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

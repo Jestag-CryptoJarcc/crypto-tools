@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% set page_title = "Suggestions & Contact" %}\r\n{% set page_wide = true %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">CONNECT</div>
+    <h1>Suggestions & Contact</h1>
+    <p class="lead">Send ideas, fixes, or questions. I read everything.</p>
+</header>
+
+<section class="admin-page">
+    {% if success %}
+        <p class="muted">Thanks — your message was sent.</p>
+    {% endif %}
+    <form method="POST" class="admin-form">
+        <label class="label">Email (required)</label>
+        <input type="email" name="email" placeholder="you@email.com" required>
+        <label class="label">Message</label>
+        <textarea name="message" rows="6" placeholder="Share your suggestion or message..." required></textarea>
+        <button class="chip" type="submit">Send</button>
+    </form>
+</section>
+{% endblock %}

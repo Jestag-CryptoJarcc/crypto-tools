@@ -1,0 +1,474 @@
+﻿{% extends "base.html" %}
+{% set page_title = "Tools" %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">TOOLS</div>
+    <h1>Crypto Tools</h1>
+    <p class="lead">Quick utilities for conversion and sentiment checks.</p>
+</header>
+
+<section class="grid tools-grid">
+    <div class="card wide" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Coin Converter</h2>
+            <span class="pill">USD / EUR</span>
+        </div>
+        <div class="converter">
+            <select id="coinSelect"></select>
+            <input type="number" step="0.0001" id="coinAmount" placeholder="Amount">
+            <select id="fiat">
+                <option value="usd">USD</option>
+                <option value="eur">EUR</option>
+                <option value="gbp">GBP</option>
+                <option value="aud">AUD</option>
+                <option value="cad">CAD</option>
+                <option value="jpy">JPY</option>
+                <option value="cny">CNY</option>
+                <option value="inr">INR</option>
+                <option value="krw">KRW</option>
+            </select>
+            <button class="chip" onclick="convert()">Convert</button>
+        </div>
+        <div class="result" id="convertResult">Enter an amount.</div>
+    </div>
+
+    <div class="card wide tall" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Fear & Greed</h2>
+        </div>
+        {% if fear_greed %}
+        <div class="fg-panel">
+            <div class="fg-score">
+                <div class="fg-value">{{ fear_greed.value }}</div>
+                <div class="fg-label">{{ fear_greed.classification }}</div>
+            </div>
+            <div class="fg-track">
+                <span>Extreme Fear</span>
+                <span>Neutral</span>
+                <span>Extreme Greed</span>
+            </div>
+            <div class="fg-bar">
+                <div class="fg-bar-fill" style="width: {{ fear_greed.value }}%;"></div>
+                <div class="fg-bar-pin" style="left: calc({{ fear_greed.value }}% - 7px);"></div>
+            </div>
+            <div class="fg-note">Index: {{ fear_greed.value }}/100</div>
+        </div>
+        {% else %}
+        <p class="muted">Fear & Greed index unavailable.</p>
+        {% endif %}
+    </div>
+
+    <div class="card featured" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>DCA Planner</h2>
+            <span class="pill">Monthly view</span>
+        </div>
+        <div class="converter">
+            <select id="dcaCoin"></select>
+            <input type="number" step="0.01" id="dcaAmount" placeholder="Amount per buy">
+            <select id="dcaInterval">
+                <option value="7">Weekly</option>
+                <option value="14">Every 2 weeks</option>
+                <option value="30">Monthly</option>
+            </select>
+            <button class="chip" onclick="calcDca()">Estimate</button>
+        </div>
+        <div class="mini">
+            <div>
+                <span>Monthly spend</span>
+                <strong id="dcaSpend">$0</strong>
+            </div>
+            <div>
+                <span>Estimated stack</span>
+                <strong id="dcaStack">0</strong>
+            </div>
+        </div>
+        <p class="muted">Estimate uses current price only. Actual fills vary with price and fees.</p>
+    </div>
+
+    <div class="card wide" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Portfolio Quick Input</h2>
+            <span class="pill">3–5 coins</span>
+        </div>
+        <div class="list">
+            <div class="list-item">
+                <select class="portfolio-coin"></select>
+                <input type="number" step="0.0001" class="portfolio-amount" placeholder="Amount">
+            </div>
+            <div class="list-item">
+                <select class="portfolio-coin"></select>
+                <input type="number" step="0.0001" class="portfolio-amount" placeholder="Amount">
+            </div>
+            <div class="list-item">
+                <select class="portfolio-coin"></select>
+                <input type="number" step="0.0001" class="portfolio-amount" placeholder="Amount">
+            </div>
+            <div class="list-item">
+                <select class="portfolio-coin"></select>
+                <input type="number" step="0.0001" class="portfolio-amount" placeholder="Amount">
+            </div>
+            <div class="list-item">
+                <select class="portfolio-coin"></select>
+                <input type="number" step="0.0001" class="portfolio-amount" placeholder="Amount">
+            </div>
+        </div>
+        <div class="mini">
+            <div>
+                <span>Total value</span>
+                <strong id="portfolioTotal">$0</strong>
+            </div>
+            <div>
+                <span>Top movers (24h)</span>
+                <strong id="portfolioMovers">—</strong>
+            </div>
+        </div>
+        <button class="chip secondary" type="button" onclick="calcPortfolio()">Update</button>
+    </div>
+
+    <div class="card wide" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Gas / Fee Estimator</h2>
+            <span class="pill">Cached ranges</span>
+        </div>
+        <div class="converter">
+            <select id="feeChain">
+                <option value="eth">Ethereum</option>
+                <option value="sol">Solana</option>
+                <option value="polygon">Polygon</option>
+                <option value="bnb">BNB Chain</option>
+                <option value="btc">Bitcoin</option>
+            </select>
+            <select id="feeType">
+                <option value="swap">Swap / DeFi</option>
+                <option value="transfer">Transfer</option>
+                <option value="nft">NFT Mint</option>
+            </select>
+            <button class="chip" onclick="calcFees()">Check</button>
+        </div>
+        <div class="result" id="feeResult">Select a chain and action.</div>
+        <p class="muted">These are rough cached ranges, not live gas data.</p>
+    </div>
+
+    <div class="card wide tall" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Momentum Glance</h2>
+            <span class="pill">7D view</span>
+        </div>
+        <div class="list" id="momentumList">
+            <div class="list-item">
+                <strong>Top 5 (7D)</strong>
+                <span class="muted">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card wide" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Market Clock</h2>
+            <span class="pill">Always on</span>
+        </div>
+        <div class="mini">
+            <div>
+                <span>Local time</span>
+                <strong id="localTime">--:--</strong>
+            </div>
+            <div>
+                <span>UTC</span>
+                <strong id="utcTime">--:--</strong>
+            </div>
+        </div>
+        <p class="muted">Crypto never sleeps.</p>
+    </div>
+
+    <div class="card wide" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>Target + Stop Helper</h2>
+            <span class="pill">Risk / Reward</span>
+        </div>
+        <div class="converter">
+            <input type="number" step="0.0001" id="tpBuy" placeholder="Buy price">
+            <input type="number" step="0.01" id="tpTarget" placeholder="Target %">
+            <input type="number" step="0.0001" id="tpAmount" placeholder="Amount">
+            <button class="chip" onclick="calcTarget()">Calculate</button>
+        </div>
+        <div class="mini">
+            <div>
+                <span>Target sell price</span>
+                <strong id="tpSell">--</strong>
+            </div>
+            <div>
+                <span>Projected profit</span>
+                <strong id="tpProfit">--</strong>
+            </div>
+        </div>
+        <div class="converter">
+            <input type="number" step="0.0001" id="slEntry" placeholder="Entry price">
+            <input type="number" step="0.01" id="slMax" placeholder="Max loss %">
+            <button class="chip secondary" onclick="calcStop()">Stop level</button>
+        </div>
+        <div class="mini">
+            <div>
+                <span>Stop price</span>
+                <strong id="slPrice">--</strong>
+            </div>
+            <div>
+                <span>Risk per unit</span>
+                <strong id="slRisk">--</strong>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let btcUsd = {{ btc.price_usd if btc else 'null' }};
+    let btcEur = {{ btc.price_eur if btc else 'null' }};
+    let btcPrices = {{ btc.prices | tojson if btc else 'null' }};
+    let priceMap = {};
+
+    function convert() {
+        const amount = parseFloat(document.getElementById('coinAmount').value);
+        const fiat = document.getElementById('fiat').value;
+        const coinId = document.getElementById('coinSelect').value;
+        if (!amount || !coinId || !priceMap[coinId]) {
+            document.getElementById('convertResult').textContent = 'Enter a valid amount.';
+            return;
+        }
+        const usdRate = priceMap[coinId];
+        let rate = usdRate;
+        if (fiat !== 'usd') {
+            const fx = btcUsd && btcPrices && btcPrices[fiat] ? (btcPrices[fiat] / btcUsd) : null;
+            rate = fx ? usdRate * fx : null;
+        }
+        if (!rate) {
+            document.getElementById('convertResult').textContent = 'FX rate unavailable.';
+            return;
+        }
+        const value = amount * rate;
+        const label = fiat.toUpperCase();
+        const symbol = document.querySelector(`#coinSelect option[value="${coinId}"]`)?.dataset.symbol || '';
+        document.getElementById('convertResult').textContent = `${amount} ${symbol} = ${value.toLocaleString(undefined, {maximumFractionDigits: 2})} ${label}`;
+    }
+
+    function buildCoinOptions(list) {
+        const select = document.getElementById('coinSelect');
+        const dcaSelect = document.getElementById('dcaCoin');
+        const portfolioSelects = document.querySelectorAll('.portfolio-coin');
+        if (!select) return;
+        select.innerHTML = '';
+        if (dcaSelect) dcaSelect.innerHTML = '';
+        portfolioSelects.forEach((el) => (el.innerHTML = ''));
+        list.forEach((coin) => {
+            const opt = document.createElement('option');
+            opt.value = coin.id;
+            opt.dataset.symbol = coin.symbol;
+            opt.textContent = `${coin.name} (${coin.symbol})`;
+            select.appendChild(opt);
+            priceMap[coin.id] = coin.price_usd;
+            if (dcaSelect) dcaSelect.appendChild(opt.cloneNode(true));
+            portfolioSelects.forEach((el) => el.appendChild(opt.cloneNode(true)));
+        });
+        if (select.options.length) select.selectedIndex = 0;
+        if (dcaSelect && dcaSelect.options.length) dcaSelect.selectedIndex = 0;
+        portfolioSelects.forEach((el, i) => {
+            if (el.options.length) el.selectedIndex = i % el.options.length;
+        });
+    }
+
+    function calcDca() {
+        const amount = parseFloat(document.getElementById('dcaAmount').value);
+        const interval = parseFloat(document.getElementById('dcaInterval').value);
+        const coinId = document.getElementById('dcaCoin').value;
+        if (!amount || !interval || !coinId || !priceMap[coinId]) {
+            document.getElementById('dcaSpend').textContent = '$0';
+            document.getElementById('dcaStack').textContent = '0';
+            return;
+        }
+        const monthlyBuys = 30 / interval;
+        const monthlySpend = amount * monthlyBuys;
+        const price = priceMap[coinId];
+        const stack = price ? (monthlySpend / price) : 0;
+        document.getElementById('dcaSpend').textContent = `$${monthlySpend.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+        document.getElementById('dcaStack').textContent = stack.toLocaleString(undefined, {maximumFractionDigits: 6});
+    }
+
+    function calcPortfolio() {
+        const rows = document.querySelectorAll('.list-item');
+        let total = 0;
+        const selected = [];
+        rows.forEach((row) => {
+            const coin = row.querySelector('.portfolio-coin')?.value;
+            const amount = parseFloat(row.querySelector('.portfolio-amount')?.value || '0');
+            if (!coin || !amount || !priceMap[coin]) return;
+            total += amount * priceMap[coin];
+            selected.push(coin);
+        });
+        document.getElementById('portfolioTotal').textContent = `$${total.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+
+        let movers = [];
+        selected.forEach((coinId) => {
+            const data = window._coinDataMap?.[coinId];
+            if (!data || data.change_24h == null) return;
+            movers.push({ id: coinId, change: data.change_24h, symbol: data.symbol });
+        });
+        movers.sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
+        const top = movers.slice(0, 2).map((m) => `${m.symbol} ${m.change >= 0 ? '+' : ''}${m.change.toFixed(2)}%`);
+        document.getElementById('portfolioMovers').textContent = top.length ? top.join(' · ') : '—';
+    }
+
+    function calcFees() {
+        const chain = document.getElementById('feeChain').value;
+        const type = document.getElementById('feeType').value;
+        const ranges = {
+            eth: { transfer: '$2 - $8', swap: '$12 - $40', nft: '$15 - $60' },
+            sol: { transfer: '< $0.01', swap: '$0.10 - $0.60', nft: '$0.20 - $1.50' },
+            polygon: { transfer: '$0.01 - $0.10', swap: '$0.10 - $0.80', nft: '$0.20 - $1.50' },
+            bnb: { transfer: '$0.05 - $0.30', swap: '$0.30 - $1.50', nft: '$0.20 - $1.20' },
+            btc: { transfer: '$1 - $6', swap: 'N/A', nft: 'N/A' },
+        };
+        const range = ranges[chain]?.[type] || 'N/A';
+        document.getElementById('feeResult').textContent = `Estimated fee range: ${range}`;
+    }
+
+    function calcTarget() {
+        const buy = parseFloat(document.getElementById('tpBuy').value);
+        const target = parseFloat(document.getElementById('tpTarget').value);
+        const amount = parseFloat(document.getElementById('tpAmount').value);
+        if (!buy || !target) {
+            document.getElementById('tpSell').textContent = '--';
+            document.getElementById('tpProfit').textContent = '--';
+            return;
+        }
+        const sell = buy * (1 + target / 100);
+        const profit = amount ? (sell - buy) * amount : null;
+        document.getElementById('tpSell').textContent = sell.toLocaleString(undefined, { maximumFractionDigits: 6 });
+        document.getElementById('tpProfit').textContent = profit == null
+            ? '--'
+            : `$${profit.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    }
+
+    function calcStop() {
+        const entry = parseFloat(document.getElementById('slEntry').value);
+        const max = parseFloat(document.getElementById('slMax').value);
+        if (!entry || !max) {
+            document.getElementById('slPrice').textContent = '--';
+            document.getElementById('slRisk').textContent = '--';
+            return;
+        }
+        const stop = entry * (1 - max / 100);
+        const risk = entry - stop;
+        document.getElementById('slPrice').textContent = stop.toLocaleString(undefined, { maximumFractionDigits: 6 });
+        document.getElementById('slRisk').textContent = risk.toLocaleString(undefined, { maximumFractionDigits: 6 });
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const local = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const utc = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+        const localEl = document.getElementById('localTime');
+        const utcEl = document.getElementById('utcTime');
+        if (localEl) localEl.textContent = local;
+        if (utcEl) utcEl.textContent = utc;
+    }
+
+    async function refreshData() {
+        try {
+            const res = await fetch('/api/summary');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!data) return;
+            if (data.btc) {
+                btcUsd = data.btc.price_usd;
+                btcEur = data.btc.price_eur;
+                btcPrices = data.btc.prices || btcPrices;
+            }
+
+            const combined = [];
+            const seen = new Set();
+            window._coinDataMap = {};
+            (data.top_coins || []).forEach((coin) => {
+                if (!coin?.id || seen.has(coin.id)) return;
+                seen.add(coin.id);
+                combined.push(coin);
+                window._coinDataMap[coin.id] = coin;
+            });
+            (data.my_coins || []).forEach((coin) => {
+                if (!coin?.id || seen.has(coin.id)) return;
+                seen.add(coin.id);
+                combined.push(coin);
+                window._coinDataMap[coin.id] = coin;
+            });
+            if (combined.length) buildCoinOptions(combined);
+            updateMomentum(data.top_coins || []);
+
+            const meterFill = document.querySelector('.fg-bar-fill');
+            if (meterFill && data.fear_greed) {
+                meterFill.style.width = `${data.fear_greed.value}%`;
+            }
+            const meterThumb = document.querySelector('.fg-bar-pin');
+            if (meterThumb && data.fear_greed) {
+                meterThumb.style.left = `calc(${data.fear_greed.value}% - 7px)`;
+            }
+            const moodEl = document.querySelector('.fg-label');
+            if (moodEl && data.fear_greed) moodEl.textContent = data.fear_greed.classification;
+            const fgText = document.querySelector('.fg-note');
+            if (fgText && data.fear_greed) fgText.textContent = `Index: ${data.fear_greed.value}/100`;
+        } catch (err) {
+            // ignore
+        }
+    }
+
+    function updateMomentum(topCoins) {
+        const list = document.getElementById('momentumList');
+        if (!list) return;
+        const items = (topCoins || [])
+            .filter((coin) => coin && coin.change_7d != null)
+            .map((coin) => ({
+                id: coin.id,
+                name: coin.name,
+                symbol: coin.symbol,
+                change: Number(coin.change_7d),
+            }))
+            .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+            .slice(0, 5);
+
+        if (!items.length) {
+            list.innerHTML = `
+                <div class="list-item">
+                    <strong>Top 5 (7D)</strong>
+                    <span class="muted">No 7D data yet</span>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = items
+            .map((coin) => {
+                const up = coin.change >= 0;
+                const arrow = up ? '▲' : '▼';
+                const sign = up ? '+' : '';
+                return `
+                    <div class="list-item">
+                        <strong>${coin.name} (${coin.symbol})</strong>
+                        <span class="${up ? 'delta up' : 'delta down'}">${arrow} ${sign}${coin.change.toFixed(2)}%</span>
+                    </div>`;
+            })
+            .join('');
+    }
+
+    refreshData();
+    updateClock();
+    setInterval(updateClock, 1000 * 30);
+    setInterval(refreshData, 15000);
+</script>
+{% endblock %}
+

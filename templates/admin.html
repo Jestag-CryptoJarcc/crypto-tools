@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% set page_title = "Admin" %}\r\n{% set page_wide = true %}
+{% block content %}
+<section class="admin-page">
+    <h1>Holdings Admin</h1>
+    {% if not logged_in %}
+        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+        <form method="POST">
+            <label class="label">Admin Password</label>
+            <input type="password" name="password" placeholder="Enter admin password" required>
+            <button class="chip" type="submit">Login</button>
+        </form>
+    {% else %}
+        <div class="mini">
+            <div>
+                <span>Holdings</span>
+                <strong>{{ stats.holdings }}</strong>
+            </div>
+            <div>
+                <span>Suggestions</span>
+                <strong>{{ stats.suggestions }}</strong>
+            </div>
+            <div>
+                <span>New</span>
+                <strong>{{ stats.new_suggestions }}</strong>
+            </div>
+            <div>
+                <span>Last Update</span>
+                <strong>{{ site_updated }}</strong>
+            </div>
+        </div>
+
+        <form method="POST" class="admin-form">
+            <input type="hidden" name="action" value="add">
+            <input type="text" name="name" placeholder="Coin name (e.g. Bitcoin)" required>
+            <input type="text" name="symbol" placeholder="Symbol (e.g. BTC)" required>
+            <input type="text" name="note" placeholder="Note (optional)">
+            <button class="chip" type="submit">Add</button>
+        </form>
+
+        <div class="admin-list">
+            {% for h in holdings %}
+            <form method="POST" class="admin-row">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="index" value="{{ loop.index0 }}">
+                <div>
+                    <strong>{{ h.name }}</strong> <span class="muted">{{ h.symbol }}</span>
+                    <div class="muted">{{ h.note }}</div>
+                </div>
+                <button class="chip secondary" type="submit">Delete</button>
+            </form>
+            {% endfor %}
+        </div>
+
+        <div class="admin-list">
+            <h2>Suggestions & Contact</h2>
+            {% if suggestions %}
+                <div class="list">
+                    <div>
+                        <strong class="status-pill status-new">New</strong>
+                    </div>
+                    {% if suggestion_groups.new %}
+                        {% for idx, item in suggestion_groups.new %}
+                        <div class="admin-row suggestion-card status-new">
+                            <div>
+                                <strong>{{ item.email }}</strong>
+                                <div class="muted">{{ item.created }}</div>
+                                <div class="muted">{{ item.message }}</div>
+                            </div>
+                            <div class="pill-row">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_status">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit" name="status" value="in_progress">In Progress</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_status">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit" name="status" value="done">Done</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_delete">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="muted">No new suggestions.</p>
+                    {% endif %}
+                </div>
+
+                <div class="list">
+                    <div>
+                        <strong class="status-pill status-progress">In Progress</strong>
+                    </div>
+                    {% if suggestion_groups.in_progress %}
+                        {% for idx, item in suggestion_groups.in_progress %}
+                        <div class="admin-row suggestion-card status-progress">
+                            <div>
+                                <strong>{{ item.email }}</strong>
+                                <div class="muted">{{ item.created }}</div>
+                                <div class="muted">{{ item.message }}</div>
+                            </div>
+                            <div class="pill-row">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_status">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit" name="status" value="new">New</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_status">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit" name="status" value="done">Done</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_delete">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="muted">No items in progress.</p>
+                    {% endif %}
+                </div>
+
+                <div class="list">
+                    <div>
+                        <strong class="status-pill status-done">Done</strong>
+                    </div>
+                    {% if suggestion_groups.done %}
+                        {% for idx, item in suggestion_groups.done %}
+                        <div class="admin-row suggestion-card status-done">
+                            <div>
+                                <strong>{{ item.email }}</strong>
+                                <div class="muted">{{ item.created }}</div>
+                                <div class="muted">{{ item.message }}</div>
+                            </div>
+                            <div class="pill-row">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_status">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit" name="status" value="new">New</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_status">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit" name="status" value="in_progress">In Progress</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="suggestion_delete">
+                                    <input type="hidden" name="s_index" value="{{ idx }}">
+                                    <button class="chip secondary" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="muted">No completed items.</p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="muted">No suggestions yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="admin-list">
+            <h2>Site Health</h2>
+            <div class="list">
+                <div class="list-item">
+                    <span>Created</span>
+                    <strong>{{ site_created }}</strong>
+                </div>
+                <div class="list-item">
+                    <span>Last Update</span>
+                    <strong>{{ site_updated }}</strong>
+                </div>
+                <div class="list-item">
+                    <span>Cache</span>
+                    <strong>{{ cache_snapshot | length }} keys</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="pill-row">
+            <a href="/my" class="chip secondary">Back</a>
+            <a href="/logout" class="chip secondary">Logout</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+

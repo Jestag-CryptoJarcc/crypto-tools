@@ -1,0 +1,230 @@
+﻿{% extends "base.html" %}
+{% set page_title = "Markets" %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">MARKETS</div>
+    <h1>Market Data</h1>
+    <p class="lead">Live market data for all coins you track.</p>
+    <div class="market-search">
+        <input id="marketSearch" type="text" placeholder="Search a coin (name or symbol). If it fails, refresh — might be a CoinGecko miss or a search glitch." autocomplete="off">
+    </div>
+</header>
+
+<section class="grid markets-grid" id="marketsGrid">
+    <div id="searchResultsGrid" class="markets-search-grid"></div>
+    {% for coin in coins %}
+    <div class="card market-card" data-id="{{ coin.id }}" data-name="{{ coin.name|lower }}" data-symbol="{{ coin.symbol|lower }}">
+        <div class="card-header">
+            <div class="market-coin">
+                {% if coin.image %}
+                <img src="{{ coin.image }}" alt="{{ coin.symbol }} logo" loading="lazy">
+                {% endif %}
+                <div>
+                    <h2>{{ coin.name }} ({{ coin.symbol }})</h2>
+                    {% if coin.website %}
+                    <a class="muted market-link" href="{{ coin.website }}" target="_blank" rel="noopener">Official site</a>
+                    {% else %}
+                    <span class="muted">Official site: add URL</span>
+                    {% endif %}
+                </div>
+            </div>
+            <span class="pill">Live</span>
+        </div>
+        <div class="price-row">
+            <div class="price">${{ "{:,.6f}".format(coin.price_usd) }}</div>
+            <div class="delta {{ 'up' if coin.change_24h >= 0 else 'down' }}">
+                {{ "{:+.2f}%".format(coin.change_24h) }}
+            </div>
+        </div>
+        <div class="mini">
+            <div>
+                <span>24h Volume</span>
+                <strong>${{ "{:,.0f}".format(coin.volume_24h) }}</strong>
+            </div>
+            <div>
+                <span>Market Cap</span>
+                <strong>${{ "{:,.0f}".format(coin.market_cap) }}</strong>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const searchInput = document.getElementById('marketSearch');
+    const marketCards = Array.from(document.querySelectorAll('.market-card'));
+    const marketsGrid = document.getElementById('marketsGrid');
+    const searchResultsGrid = document.getElementById('searchResultsGrid');
+    let searchTimer = null;
+    let searchRequestId = 0;
+    let activeQuery = '';
+
+    const resetOrder = () => {
+        activeQuery = '';
+        marketCards.forEach((card) => {
+            card.style.display = '';
+            marketsGrid.appendChild(card);
+        });
+        if (searchResultsGrid) searchResultsGrid.innerHTML = '';
+    };
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim();
+            if (!q) {
+                resetOrder();
+                return;
+            }
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => runSearch(q), 250);
+        });
+    }
+
+    function renderSearch(items) {
+        if (!searchResultsGrid) return;
+        marketCards.forEach((card) => {
+            card.style.display = 'none';
+        });
+        if (!items || !items.length) {
+            searchResultsGrid.innerHTML = `
+                <div class="card market-card">
+                    <div class="card-header">
+                        <h2>No matches found</h2>
+                        <span class="pill">CoinGecko</span>
+                    </div>
+                    <p class="muted">Try a different name or ticker.</p>
+                </div>
+            `;
+            return;
+        }
+        searchResultsGrid.innerHTML = items.map((coin) => {
+            const priceVal = coin.price_usd ?? coin.current_price ?? null;
+            const volVal = coin.volume_24h ?? coin.total_volume ?? null;
+            const capVal = coin.market_cap ?? null;
+            const changeVal = coin.change_24h ?? coin.price_change_percentage_24h ?? null;
+
+            const price = priceVal != null ? `$${Number(priceVal).toLocaleString(undefined, {maximumFractionDigits: 6})}` : '—';
+            const vol = volVal != null ? `$${Number(volVal).toLocaleString()}` : '—';
+            const cap = capVal != null ? `$${Number(capVal).toLocaleString()}` : '—';
+            const change = changeVal != null ? Number(changeVal) : null;
+            const deltaText = change == null ? '—' : `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+            const deltaClass = change == null ? '' : (change >= 0 ? 'up' : 'down');
+            return `
+                <div class="card market-card">
+                    <div class="card-header">
+                        <div class="market-coin">
+                            ${coin.image ? `<img src="${coin.image}" alt="${coin.symbol} logo" loading="lazy">` : ''}
+                            <div>
+                                <h2>${coin.name} (${coin.symbol})</h2>
+                                <span class="muted">CoinGecko result</span>
+                            </div>
+                        </div>
+                        <span class="pill">Live</span>
+                    </div>
+                    <div class="price-row">
+                        <div class="price">${price}</div>
+                        <div class="delta ${deltaClass}">${deltaText}</div>
+                    </div>
+                    <div class="mini">
+                        <div>
+                            <span>24h Volume</span>
+                            <strong>${vol}</strong>
+                        </div>
+                        <div>
+                            <span>Market Cap</span>
+                            <strong>${cap}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function runSearch(query) {
+        if (!query || query.length < 2) {
+            resetOrder();
+            return;
+        }
+        const requestId = ++searchRequestId;
+        activeQuery = query;
+        try {
+            const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (requestId !== searchRequestId) return;
+            if (activeQuery !== query) return;
+            const results = data.results || [];
+            if (!results.length) {
+                if (searchResultsGrid) {
+                    searchResultsGrid.innerHTML = `
+                        <div class="card market-card">
+                            <div class="card-header">
+                                <h2>No matches found</h2>
+                                <span class="pill">CoinGecko</span>
+                            </div>
+                            <p class="muted">Try a different name or ticker.</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+            renderSearch(results);
+        } catch (err) {
+            // ignore
+        }
+    }
+
+    async function refreshMarketData() {
+        if (activeQuery) return;
+        try {
+            const res = await fetch('/api/summary');
+            if (!res.ok) return;
+            const data = await res.json();
+            const combined = [];
+            const seen = new Set();
+            (data.my_coins || []).forEach((coin) => {
+                if (!coin?.id || seen.has(coin.id)) return;
+                seen.add(coin.id);
+                combined.push(coin);
+            });
+            (data.top_coins || []).forEach((coin) => {
+                if (!coin?.id || seen.has(coin.id)) return;
+                seen.add(coin.id);
+                combined.push(coin);
+            });
+            combined.forEach((coin) => {
+                const card = document.querySelector(`.market-card[data-id="${coin.id}"]`);
+                if (!card) return;
+                const priceEl = card.querySelector('.price');
+                if (priceEl && coin.price_usd != null) {
+                    priceEl.textContent = `$${Number(coin.price_usd).toLocaleString(undefined, {maximumFractionDigits: 6})}`;
+                }
+                const deltaEl = card.querySelector('.delta');
+                if (deltaEl && coin.change_24h != null) {
+                    const change = Number(coin.change_24h);
+                    deltaEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                    deltaEl.classList.toggle('up', change >= 0);
+                    deltaEl.classList.toggle('down', change < 0);
+                }
+                const minis = card.querySelectorAll('.mini strong');
+                if (minis.length >= 2) {
+                    if (coin.volume_24h != null) {
+                        minis[0].textContent = `$${Number(coin.volume_24h).toLocaleString()}`;
+                    }
+                    if (coin.market_cap != null) {
+                        minis[1].textContent = `$${Number(coin.market_cap).toLocaleString()}`;
+                    }
+                }
+            });
+        } catch (err) {
+            // ignore
+        }
+    }
+
+    refreshMarketData();
+    setInterval(refreshMarketData, 10000);
+</script>
+{% endblock %}
+

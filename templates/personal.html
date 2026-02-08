@@ -1,0 +1,82 @@
+﻿{% extends "base.html" %}
+{% set page_title = "My Crypto" %}
+{% block content %}
+<header class="hero">
+    <div class="kicker">PERSONAL</div>
+    <h1>My Crypto</h1>
+    <p class="lead">A personal snapshot of the coins I track and the notes I keep on each one.</p>
+</header>
+
+<section class="grid personal-grid">
+    <div class="card wide personal-watchlist" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>My Watchlist</h2>
+            <span class="pill">My Coins</span>
+        </div>
+        {% if my_coins %}
+        <div class="market-list">
+            {% for coin in my_coins %}
+            <div class="market-row">
+                <div class="market-coin">
+                    {% if coin.image %}
+                    <img src="{{ coin.image }}" alt="{{ coin.symbol }} logo" loading="lazy">
+                    {% endif %}
+                    <div>
+                        <strong>{{ coin.name }}</strong>
+                        <span class="muted">{{ coin.symbol }}</span>
+                    </div>
+                </div>
+                <div class="market-metrics">
+                    <div>
+                        <span class="muted">Price</span>
+                        <strong>${{ "{:,.6f}".format(coin.price_usd) }}</strong>
+                    </div>
+                    <div>
+                        <span class="muted">24h</span>
+                        <strong data-change class="{{ 'up' if coin.change_24h >= 0 else 'down' }}">
+                            <span class="change-arrow">{{ '▲' if coin.change_24h >= 0 else '▼' }}</span>
+                            {{ "{:+.2f}%".format(coin.change_24h) }}
+                        </strong>
+                    </div>
+                    <div>
+                        <span class="muted">Volume</span>
+                        <strong>${{ "{:,.0f}".format(coin.volume_24h) }}</strong>
+                    </div>
+                    <div>
+                        <span class="muted">Market Cap</span>
+                        <strong>${{ "{:,.0f}".format(coin.market_cap) }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">Watchlist data unavailable.</p>
+        {% endif %}
+    </div>
+
+    <div class="card featured" data-widget>
+        <button class="expand-close" type="button">Close</button>
+        <div class="card-header">
+            <h2>My Holdings</h2>
+        </div>
+        {% if holdings %}
+        <div class="list">
+            {% for h in holdings %}
+            <div class="list-item">
+                <div>
+                    <strong>{{ h.name }}</strong>
+                    <span class="muted">{{ h.symbol }}</span>
+                </div>
+                <span class="muted">{{ h.note }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">No holdings listed yet. Add from admin.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

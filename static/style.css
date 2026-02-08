@@ -847,6 +847,9 @@ body.widget-open .widget-overlay {
 }
 
 @media (max-width: 900px) {
+    .app-shell {
+        min-height: auto;
+    }
     .card.widget-expanded {
         inset: 6vh 6vw auto 6vw;
     }
@@ -863,10 +866,12 @@ body.widget-open .widget-overlay {
     .side {
         position: static;
         height: auto;
+        min-height: 0;
         border-right: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         display: flex;
         flex-direction: column;
+        padding-bottom: 12px;
     }
     .side-nav {
         flex-direction: row;
@@ -899,6 +904,10 @@ body.widget-open .widget-overlay {
 
     .page.wide {
         padding: 18px 16px 48px;
+    }
+
+    .guide-grid {
+        gap: 22px;
     }
 }
 

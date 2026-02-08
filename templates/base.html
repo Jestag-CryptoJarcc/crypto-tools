@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title }}</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v={{ site_updated|replace(' ', '-')|replace(':','') }}">
 </head>
 <body>
     <canvas id="bg-canvas" aria-hidden="true"></canvas>

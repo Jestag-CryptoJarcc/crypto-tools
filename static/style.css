@@ -963,6 +963,14 @@ body.widget-open .widget-overlay {
     .pill-row {
         flex-wrap: wrap;
     }
+
+    .guide-grid {
+        gap: 28px;
+    }
+
+    .guide-card {
+        background: rgba(18, 24, 30, 0.98);
+    }
 }
 
 .admin-card { max-width: 900px; margin: 0 auto; }

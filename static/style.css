@@ -1075,6 +1075,14 @@ canvas#spark {
     margin-top: 12px;
 }
 
+.paged-controls.sticky {
+    position: sticky;
+    bottom: 0;
+    padding: 10px 0 6px;
+    background: linear-gradient(180deg, rgba(12, 16, 20, 0), rgba(12, 16, 20, 0.9));
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .market-pager {
     margin: 16px 0 0;
 }

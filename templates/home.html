@@ -269,9 +269,9 @@
         {% else %}
         <p class="muted">Unable to load market data right now. Please refresh in a moment.</p>
         {% endif %}
-        </div>
-        <div class="paged-controls">
+        <div class="paged-controls sticky">
             <button class="chip secondary load-more" type="button">Load more</button>
+        </div>
         </div>
     </div>
     <div class="market-panel hidden" data-panel="mycoins">
@@ -311,9 +311,9 @@
                 </div>
             </div>
             {% endfor %}
-        </div>
-        <div class="paged-controls">
-            <button class="chip secondary load-more" type="button">Load more</button>
+            <div class="paged-controls sticky">
+                <button class="chip secondary load-more" type="button">Load more</button>
+            </div>
         </div>
         {% else %}
         <p class="muted">Your important coins will show here once you add them.</p>
@@ -363,7 +363,7 @@
         if (!container) return;
         const size = Number(container.dataset.pageSize || 20);
         const items = Array.from(container.querySelectorAll('.market-row'));
-        const controls = container.parentElement?.querySelector('.paged-controls');
+        const controls = container.querySelector('.paged-controls') || container.parentElement?.querySelector('.paged-controls');
         const btn = controls?.querySelector('.load-more');
         if (!btn) return;
 

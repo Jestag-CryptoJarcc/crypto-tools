@@ -50,9 +50,9 @@
                 </div>
             </div>
             {% endfor %}
-        </div>
-        <div class="paged-controls">
-            <button class="chip secondary load-more" type="button">Load more</button>
+            <div class="paged-controls sticky">
+                <button class="chip secondary load-more" type="button">Load more</button>
+            </div>
         </div>
         {% else %}
         <p class="muted">Watchlist data unavailable.</p>
@@ -87,7 +87,7 @@
 <script>
     function renderWatchlist(coins) {
         const list = document.querySelector('.personal-watchlist .market-list');
-        const controls = document.querySelector('.personal-watchlist .paged-controls');
+        const controls = list.querySelector('.paged-controls') || document.querySelector('.personal-watchlist .paged-controls');
         const btn = controls?.querySelector('.load-more');
         if (!list) return;
         if (!coins || !coins.length) {

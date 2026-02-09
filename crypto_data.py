@@ -238,7 +238,9 @@ def get_top_coins(limit=50):
             with open(TOP_COINS_CACHE, "r", encoding="utf-8") as f:
                 cached = json.load(f)
             if isinstance(cached, list) and cached:
-                return cached
+                if len(cached) >= limit:
+                    return cached[:limit]
+                # cached list too small for requested limit, fall through to fetch fresh
         except (OSError, json.JSONDecodeError):
             pass
 

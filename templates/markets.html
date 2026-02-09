@@ -31,24 +31,49 @@
             <span class="pill">Live</span>
         </div>
         <div class="price-row">
-            <div class="price">${{ "{:,.6f}".format(coin.price_usd) }}</div>
+            <div class="price">
+                {% if coin.price_usd is not none %}
+                ${{ "{:,.6f}".format(coin.price_usd) }}
+                {% else %}
+                —
+                {% endif %}
+            </div>
+            {% if coin.change_24h is not none %}
             <div class="delta {{ 'up' if coin.change_24h >= 0 else 'down' }}">
                 {{ "{:+.2f}%".format(coin.change_24h) }}
             </div>
+            {% else %}
+            <div class="delta muted">—</div>
+            {% endif %}
         </div>
         <div class="mini">
             <div>
                 <span>24h Volume</span>
-                <strong>${{ "{:,.0f}".format(coin.volume_24h) }}</strong>
+                <strong>
+                    {% if coin.volume_24h is not none %}
+                    ${{ "{:,.0f}".format(coin.volume_24h) }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </strong>
             </div>
             <div>
                 <span>Market Cap</span>
-                <strong>${{ "{:,.0f}".format(coin.market_cap) }}</strong>
+                <strong>
+                    {% if coin.market_cap is not none %}
+                    ${{ "{:,.0f}".format(coin.market_cap) }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </strong>
             </div>
         </div>
     </div>
     {% endfor %}
 </section>
+<div class="paged-controls market-pager">
+    <button class="chip secondary load-more" type="button">Load more</button>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -57,6 +82,9 @@
     const marketCards = Array.from(document.querySelectorAll('.market-card'));
     const marketsGrid = document.getElementById('marketsGrid');
     const searchResultsGrid = document.getElementById('searchResultsGrid');
+    const loadMoreBtn = document.querySelector('.market-pager .load-more');
+    const pageSize = 18;
+    let visibleCount = pageSize;
     let searchTimer = null;
     let searchRequestId = 0;
     let activeQuery = '';
@@ -68,6 +96,8 @@
             marketsGrid.appendChild(card);
         });
         if (searchResultsGrid) searchResultsGrid.innerHTML = '';
+        visibleCount = pageSize;
+        applyPagination();
     };
 
     if (searchInput) {
@@ -87,6 +117,7 @@
         marketCards.forEach((card) => {
             card.style.display = 'none';
         });
+        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
         if (!items || !items.length) {
             searchResultsGrid.innerHTML = `
                 <div class="card market-card">
@@ -142,6 +173,22 @@
         }).join('');
     }
 
+    function applyPagination() {
+        marketCards.forEach((card, idx) => {
+            card.classList.toggle('is-hidden', idx >= visibleCount);
+        });
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = visibleCount >= marketCards.length ? 'none' : 'inline-flex';
+        }
+    }
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            visibleCount = Math.min(marketCards.length, visibleCount + pageSize);
+            applyPagination();
+        });
+    }
+
     async function runSearch(query) {
         if (!query || query.length < 2) {
             resetOrder();
@@ -168,6 +215,7 @@
                         </div>
                     `;
                 }
+                if (loadMoreBtn) loadMoreBtn.style.display = 'none';
                 return;
             }
             renderSearch(results);
@@ -223,6 +271,7 @@
         }
     }
 
+    applyPagination();
     refreshMarketData();
     setInterval(refreshMarketData, 10000);
 </script>

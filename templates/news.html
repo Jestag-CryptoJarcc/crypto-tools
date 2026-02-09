@@ -105,8 +105,66 @@
         card.classList.toggle('expanded');
     });
 
-    setInterval(() => {
-        window.location.reload();
-    }, 3600000);
+    function buildNewsCard(item) {
+        const image = item.image
+            ? `<img src="${item.image}" alt="News image" loading="lazy">`
+            : `<div class="news-fallback"><span>${item.source}</span></div>`;
+        const imageWrap = `<div class="news-image ${item.image ? '' : 'placeholder'}">${image}</div>`;
+        const meta = `
+            <div class="news-meta">
+                <span class="pill">${item.source}</span>
+                <span class="muted">${item.published_str || 'Unknown time'}</span>
+            </div>`;
+        const summary = item.summary ? `<p class="news-summary">${item.summary}</p>` : '';
+        const link = item.url ? `<a class="news-link" href="${item.url}" target="_blank" rel="noopener">Source</a>` : '';
+        return `
+            <article class="news-card">
+                ${imageWrap}
+                ${meta}
+                <h3>${item.title}</h3>
+                ${summary}
+                ${link}
+            </article>`;
+    }
+
+    function renderNews(items) {
+        const dailyPanel = document.querySelector('[data-panel="daily"] .news-grid');
+        const weeklyPanel = document.querySelector('[data-panel="weekly"] .news-grid');
+        if (!dailyPanel || !weeklyPanel) return;
+        const now = Date.now() / 1000;
+        const dayCutoff = now - 86400;
+        const weekCutoff = now - 7 * 86400;
+        const daily = [];
+        const weekly = [];
+        (items || []).forEach((item) => {
+            if (!item || !item.published_ts) return;
+            if (item.published_ts >= dayCutoff) daily.push(item);
+            else if (item.published_ts >= weekCutoff) weekly.push(item);
+        });
+        daily.sort((a, b) => b.published_ts - a.published_ts);
+        weekly.sort((a, b) => b.published_ts - a.published_ts);
+        const dailyTop = daily.slice(0, 10);
+        const weeklyTop = weekly.slice(0, 10);
+        dailyPanel.innerHTML = daily.length
+            ? dailyTop.map(buildNewsCard).join('')
+            : '<p class="muted">No headlines yet today. Check back soon.</p>';
+        weeklyPanel.innerHTML = weekly.length
+            ? weeklyTop.map(buildNewsCard).join('')
+            : '<p class="muted">No headlines this week yet.</p>';
+    }
+
+    async function refreshNews() {
+        try {
+            const res = await fetch('/api/news');
+            if (!res.ok) return;
+            const data = await res.json();
+            renderNews(data.items || []);
+        } catch (err) {
+            // ignore
+        }
+    }
+
+    refreshNews();
+    setInterval(refreshNews, 60000);
 </script>
 {% endblock %}

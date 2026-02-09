@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from crypto_data import get_btc_data, get_fear_greed, get_top_coins, get_my_coins, market_mood, search_coins
+from crypto_data import get_btc_data, get_fear_greed, get_top_coins, get_my_coins, market_mood, search_coins, get_crypto_news, load_holdings
 
 api_bp = Blueprint("api", __name__)
 
@@ -37,3 +37,17 @@ def api_search():
                 fallback.append(coin)
         results = fallback[:6]
     return {"results": results}
+
+
+@api_bp.route("/api/news")
+def api_news():
+    items = get_crypto_news(limit=30)
+    return {"items": items}
+
+
+@api_bp.route("/api/personal")
+def api_personal():
+    return {
+        "my_coins": get_my_coins(),
+        "holdings": load_holdings(),
+    }

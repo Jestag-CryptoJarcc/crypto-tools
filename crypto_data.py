@@ -184,14 +184,15 @@ def get_btc_data():
     return _cached("btc", 15, _fetch)
 
 
-def get_top_coins(limit=15):
+def get_top_coins(limit=50):
     def _fetch():
         headers = {"User-Agent": "JestagCryptoTools/1.0"}
         url = "https://api.coingecko.com/api/v3/coins/markets"
+        per_page = max(1, min(int(limit), 250))
         params = {
             "vs_currency": "usd",
             "order": "market_cap_desc",
-            "per_page": 30,
+            "per_page": per_page,
             "page": 1,
             "sparkline": "false",
             "price_change_percentage": "24h,7d",
